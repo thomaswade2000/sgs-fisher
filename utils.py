@@ -1,3 +1,4 @@
+import time
 import cv2
 import numpy as np
 import ctypes
@@ -162,3 +163,27 @@ def set_threshold(threshold):
 
 def get_window():
     return _get_window()
+
+
+def drag_up(template_path, distance=250, threshold=None):
+    matches = find_template(template_path, threshold)
+    if matches is None:
+        return False
+    
+    win = _get_window()
+    if win is None:
+        return False
+    
+    x, y, w, h = matches[0]
+    start_x = win.left + x + w // 2
+    start_y = win.top + y + h // 2
+    end_x = start_x
+    end_y = start_y - distance
+    
+    pydirectinput.mouseDown(start_x, start_y)
+    time.sleep(0.1)
+    pydirectinput.moveTo(end_x, end_y, duration=0.5)
+    time.sleep(0.5)
+    pydirectinput.mouseUp()
+    logger.info(f"拖动: ({start_x}, {start_y}) -> ({end_x}, {end_y})")
+    return True
